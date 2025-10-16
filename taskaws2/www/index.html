@@ -15,8 +15,9 @@
     <h1>TASKLIST</h1>
     <div id="taskform" title="Nueva Tarea">
         <input type="text" id="tasktext">
-        <ul id="miLista"></ul>
+        
     </div>
+    <ul id="miLista"></ul>
     <script>
     $("#taskform").dialog({
         autoOpen: true,
@@ -26,6 +27,7 @@
         buttons: {
             "OK": function() {
                 mostrarPrompt();
+                $("#taskform").dialog("close");
             },
             "Cancelar": function() {
                 $("#taskform").dialog("close");
