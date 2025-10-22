@@ -1,51 +1,197 @@
 <!DOCTYPE html>
 <html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Tasklist</title>
+        <link rel="stylesheet"
+            href="https://code.jquery.com/ui/1.14.1/themes/base/jquery-ui.css">
+        <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+        <script src="https://code.jquery.com/ui/1.14.1/jquery-ui.js"></script>
+        <style>
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #f5f5f5;
+}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tasklist</title>
-    <link rel="stylesheet" href="https://code.jquery.com/ui/1.14.1/themes/base/jquery-ui.css">
-    <link rel="stylesheet" href="/resources/demos/style.css">
-    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
-    <script src="https://code.jquery.com/ui/1.14.1/jquery-ui.js"></script>
-</head>
+#taskContainer {
+    background: #fff;
+    padding: 30px 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    width: 100%;
+    max-width: 600px;
+    text-align: center;
+}
 
-<body>
-    <h1>TASKLIST</h1>
-    <div id="taskform" title="Nueva Tarea">
-        <input type="text" id="tasktext">
-        
-    </div>
-    <ul id="miLista"></ul>
-    <script>
-    $("#taskform").dialog({
-        autoOpen: true,
-        height: 250,
-        width: 350,
-        modal: true,
-        buttons: {
-            "OK": function() {
-                mostrarPrompt();
-                $("#taskform").dialog("close");
-            },
-            "Cancelar": function() {
-                $("#taskform").dialog("close");
-            }
-        }
-    });
+h1 {
+    margin-bottom: 20px;
+    color: #333;
+}
 
-    function mostrarPrompt() {
-        const tarea = $("#tasktext").val();
+#btnAdd {
+    font-size: 24px;
+    padding: 10px 20px;
+    margin-bottom: 20px;
+    cursor: pointer;
+    background-color: #a3f1a6;
+    color: #000;
+    border: none;
+    border-radius: 4px;
+}
 
-        if (tarea !== "") {
-            var jquery_elem = $("<li>" + tarea + "</li>");
-            $("#miLista").append(jquery_elem);
-        } else {
-            alert("Escribe juna");
-        }
-    }
-    </script>
-</body>
+#btnAdd:hover {
+    background-color: #76f87c;
+}
 
+ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+li {
+    background: #f9f9f9;
+    margin: 5px 0;
+    padding: 12px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.task-text {
+    flex-grow: 1;
+    margin-right: 10px;
+    text-align: left;
+}
+
+.btnTask {
+    margin-left: 5px;
+    cursor: pointer;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 3px;
+    font-size: 14px;
+}
+
+.btn-edit {
+    background-color: #8ac3f5;
+    color: white;
+}
+
+.btn-edit:hover {
+    background-color: #52adf7;
+}
+
+.btn-delete {
+    background-color: #f38278;
+    color: white;
+}
+
+.btn-delete:hover {
+    background-color: #f13c3c;
+}
+
+.ui-dialog-titlebar-close {
+    display: none;
+}
+</style>
+    </head>
+    <body>
+        <div id="taskContainer">
+            <h1>TASKLIST</h1>
+            <button id="btnAdd">+</button>
+            <ul id="miLista"></ul>
+        </div>
+
+        <!-- Form nueva tarea -->
+        <div id="taskform" title="Nueva Tarea" style="display:none;">
+            <p>Introduce la nueva tarea:</p>
+            <input type="text" id="tasktext" placeholder="Escribe tu tarea">
+        </div>
+
+        <!-- Form editar tarea -->
+        <div id="editForm" title="Editar Tarea" style="display:none;">
+            <p>Edita la tarea:</p>
+            <input type="text" id="editText" placeholder="Edita tu tarea">
+        </div>
+
+        <script>
+            $(function() {
+                // Dialog nueva tarea
+                $("#taskform").dialog({
+                    autoOpen: false,
+                    height: 200,
+                    width: 350,
+                    modal: true,
+                    buttons: {
+                        "OK": function() {
+                            agregarTarea();
+                            $(this).dialog("close");
+                        },
+                        "Cancelar": function() {
+                            $(this).dialog("close");
+                        }
+                    }
+                });
+
+                // Dialog editar tarea
+                $("#editForm").dialog({
+                    autoOpen: false,
+                    height: 200,
+                    width: 350,
+                    modal: true,
+                    buttons: {
+                        "OK": function() {
+                            const nuevaTarea = $("#editText").val().trim();
+                            if (nuevaTarea !== "") {
+                                const li = $(this).data("li");
+                                li.find(".task-text").text(nuevaTarea);
+                            }
+                            $(this).dialog("close");
+                        },
+                        "Cancelar": function() {
+                            $(this).dialog("close");
+                        }
+                    }
+                });
+
+                $("#btnAdd").click(function () {
+                    $("#tasktext").val("");
+                    $("#taskform").dialog("open");
+                });
+
+                function agregarTarea(texto = null) {
+                    let tarea = texto || $("#tasktext").val().trim();
+                    if (tarea === "") { alert("Escribe una tarea"); return; }
+
+                    const li = $("<li></li>");
+                    const span = $("<span class='task-text'></span>").text(tarea);
+
+                    const btnEditar = $("<button class='btnTask btn-edit'>Edit</button>");
+                    btnEditar.click(function (event) {
+                        const liActual = $(event.target).closest("li");
+                        const textoActual = liActual.find(".task-text").text();
+                        $("#editText").val(textoActual);
+                        $("#editForm").data("li", liActual).dialog("open");
+                    });
+
+                    const btnEliminar = $("<button class='btnTask btn-delete'>X</button>");
+                    btnEliminar.click(function (event) {
+                        $(event.target).closest("li").remove();
+                    });
+
+                    li.append(span).append(btnEditar).append(btnEliminar);
+                    $("#miLista").append(li);
+                }
+            });
+        </script>
+    </body>
 </html>
