@@ -1,0 +1,21 @@
+# Node / Cordova
+node_modules/
+platforms/
+plugins/
+www/lib/
+
+# IntelliJ / IDEA
+*.iml
+.idea/
+*.iws
+*.log
+out/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Otros archivos temporales de Cordova
+*.tmp
+*.bak
+*.swp
